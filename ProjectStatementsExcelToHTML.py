@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# This translates a project statement spreadsheet into HTML to be posted as a report.
+# This translates a project statement spreadsheet into HTML and posts it into the report format
 # The data comes from Project Center to the Data Warehouse and should have:
 # Column B - Project
 # Column C - Programme
@@ -9,14 +9,20 @@
 # Column I - Target funding
 
 from openpyxl import load_workbook, Workbook
+import datetime
 
-wb = load_workbook('ProjectStatements.xlsx')
+# Import the report template .aspx file
+report = open('ProjectStatementReportTemplate.aspx', 'r')
+reportText = report.read()
+reportParts = reportText.split('|') # splitter which has been manually inserted in the right places
+
+wb = load_workbook('ProjectStatements.xlsm')
 output = ""
 
 r = 2
 
 while True:
-    sheet = wb['Sheet1']
+    sheet = wb['Report']
     if sheet['A' + str(r)].value == None:
         break
 
@@ -71,3 +77,12 @@ while True:
 
 output = output.replace("_x000D_", " ")
 print(output)
+
+todayDate = datetime.datetime.today().strftime('%Y-%m-%d')
+
+reportOutput = reportParts[0] + todayDate  + reportParts[1] + output + reportParts[2]
+print(reportOutput)
+
+oFile = open('Project Statements.aspx', 'wb')
+oFile.write(reportOutput.encode('utf-8'))
+oFile.close()
